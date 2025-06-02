@@ -65,7 +65,7 @@
       letter-spacing: 1px;
       box-shadow: 0 0 5px rgba(218, 14, 204, 0.5);
       text-align: center;
-      max-width: 50vw;
+      max-width: 90vw;
       word-wrap: break-word;
       cursor: pointer;
       transition: all 0.3s ease;
@@ -74,6 +74,40 @@
     .center-title:hover {
       transform: translate(-50%, -50%) scale(1.05);
       box-shadow: 0 0 15px rgba(218, 14, 204, 0.8);
+    }
+
+    .music-button {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 100;
+      background: rgba(229, 21, 166, 0.9);
+      border: 2px solid #ffb6c1;
+      border-radius: 50%;
+      width: 60px;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 24px;
+      color: white;
+      box-shadow: 0 0 10px rgba(229, 21, 166, 0.5);
+      transition: all 0.3s ease;
+    }
+
+    .music-button:hover {
+      transform: scale(1.1);
+      box-shadow: 0 0 20px rgba(229, 21, 166, 0.8);
+    }
+
+    .music-button.playing {
+      animation: pulse 2s ease-in-out infinite alternate;
+    }
+
+    @keyframes pulse {
+      0% { box-shadow: 0 0 10px rgba(229, 21, 166, 0.5); }
+      100% { box-shadow: 0 0 25px rgba(229, 21, 166, 1); }
     }
 
     .falling-element {
@@ -137,6 +171,8 @@
   <div class="stars"></div>
   <div class="center-title">LINDA MUCHACHITA</div>
   
+  <div class="music-button" id="musicButton">🎵</div>
+  
   <audio id="backgroundMusic" loop preload="auto">
     <source src="Linda Muchachita.mp3" type="audio/mpeg">
     Tu navegador no soporta el elemento de audio.
@@ -157,21 +193,38 @@
 
     let musicStarted = false;
     const music = document.getElementById('backgroundMusic');
+    const musicButton = document.getElementById('musicButton');
 
-    // Función para iniciar la música
-    function startMusic() {
-      if (!musicStarted) {
-        music.play().catch(e => {
+    // Función para iniciar/pausar la música
+    function toggleMusic() {
+      if (music.paused) {
+        music.play().then(() => {
+          musicButton.textContent = '🔊';
+          musicButton.classList.add('playing');
+          musicStarted = true;
+        }).catch(e => {
           console.log('Error al reproducir música:', e);
+          musicButton.textContent = '❌';
         });
-        musicStarted = true;
+      } else {
+        music.pause();
+        musicButton.textContent = '🎵';
+        musicButton.classList.remove('playing');
       }
     }
 
-    // Agregar event listeners para iniciar música
-    document.addEventListener('click', startMusic);
-    document.addEventListener('touchstart', startMusic);
-    document.querySelector('.center-title').addEventListener('click', startMusic);
+    // Event listeners
+    musicButton.addEventListener('click', toggleMusic);
+    document.addEventListener('click', function(e) {
+      if (!musicStarted && e.target !== musicButton) {
+        toggleMusic();
+      }
+    });
+    document.addEventListener('touchstart', function(e) {
+      if (!musicStarted && e.target !== musicButton) {
+        toggleMusic();
+      }
+    });
 
     function createFallingElement(content, className) {
       const element = document.createElement("div");
